@@ -25,7 +25,7 @@ Ensure you have the following installed:
 3. Modify the script to read the actual data from the database or CSV.
 4. Run the Python script:
    ```sh
-   python visualize_data.py
+   jupyter notebook Notebook.ipynb
    ```
 5. The plots will be displayed one by one for analysis.
 
