@@ -2,7 +2,7 @@
 # 🎓 University Recruitment Database
 
 <p align="center">
-  <img src="assets/diagram.png" alt="System diagram: University Recruitment Data Visualization Flow" width="500">
+  <img src="assets/diagram.pdf" alt="System diagram: University Recruitment Data Visualization Flow" width="500">
   <br/>
   <em>High-level flow of the recruitment data analysis and visualization pipeline.</em>
 </p>
