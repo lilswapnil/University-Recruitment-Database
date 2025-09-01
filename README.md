@@ -2,27 +2,28 @@
 # 🎓 University Recruitment Database
 
 <p align="center">
-  <img src="assets/diagram.pdf" alt="System diagram: University Recruitment Data Visualization Flow" width="500">
+  <img src="assets/diagram/diagram-1.png" alt="Entity-Relationship Diagram of University Recruitment Database" width="700">
   <br/>
-  <em>High-level flow of the recruitment data analysis and visualization pipeline.</em>
+  <em>ER diagram of the recruitment database showing core tables and relationships.</em>
 </p>
 
 ---
 
 ## 📖 Overview
-The **University Recruitment Database** project analyzes and visualizes key aspects of university data, including student enrollments, instructor distribution, salary structures, and tuition patterns.  
+The **University Recruitment Database** project provides SQL schemas, reporting queries, and Jupyter notebooks to explore and visualize insights into university recruitment and student lifecycle management.  
 
-Using **Python (Jupyter Notebook)** and **SQL**, the project transforms raw institutional data into meaningful insights that support data-driven decision-making.
+The database supports applications, onboarding, interviews, and course assignments, while the notebook visualizes student and faculty data for analysis.
 
 ---
 
 ## ✨ Features
-- **Student Enrollment Trends** (monthly bar chart)  
-- **Instructor Salary Distribution** (histogram)  
-- **Course Enrollment Distribution** (bar chart)  
-- **Department-wise Instructor Count** (bar chart)  
-- **Tuition vs. Course Units Analysis** (scatter plot)  
-- Interactive visualizations built with `matplotlib` and `pandas`  
+- **Entity-Relationship (ER) Diagrams** for understanding database design
+- **Student Enrollment Trends** (bar charts)
+- **Instructor Salary Distribution** (histograms)
+- **Course Enrollment Distribution**
+- **Department-wise Instructor Counts**
+- **Tuition vs. Course Units Analysis** (scatter plots)
+- SQL scripts for schema creation and reporting
 
 ---
 
@@ -30,73 +31,81 @@ Using **Python (Jupyter Notebook)** and **SQL**, the project transforms raw inst
 ```
 
 University-Recruitment-Database/
-│── Notebook.ipynb           # Main Jupyter notebook for visualizations
-│── UMC.sql                  # SQL schema / queries for university database
-│── business\_reports.sql      # Additional reporting queries
-│── README.md                 # Project documentation
-│── assets/diagram.png        # System flow diagram
+│── Notebook.ipynb              # Jupyter notebook for data visualization
+│── UMC.sql                     # SQL schema for University Recruitment DB
+│── business\_reports.sql        # Reporting queries for insights
+│── assets/
+│    └── diagram/
+│        ├── diagram-1.png      # ER Diagram (main view)
+│        ├── diagram-2.png      # ER Diagram (extended view)
+│── README.md                   # Project documentation
 
 ````
 
 ---
 
-## ⚙️ Prerequisites
-- Python **3.x**
-- Jupyter Notebook
-- Libraries:
-  - `pandas`
-  - `numpy`
-  - `matplotlib`
+## 🖼️ Database Diagrams
+### Main ER Diagram
+<p align="center">
+  <img src="assets/diagram/diagram-1.png" alt="Main ER Diagram" width="750">
+</p>
 
-Install dependencies:
-```bash
-pip install pandas numpy matplotlib
+### Extended ER Diagram
+<p align="center">
+  <img src="assets/diagram/diagram-2.png" alt="Extended ER Diagram" width="750">
+</p>
+
+---
+
+## ⚙️ Prerequisites
+- **Python 3.x**
+- Jupyter Notebook
+- Required libraries:
+  ```bash
+  pip install pandas numpy matplotlib
 ````
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Clone the repository**
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/lilswapnil/University-Recruitment-Database.git
    cd University-Recruitment-Database
    ```
 
-2. **Set up the database**
+2. Set up the database:
 
-   * Run `UMC.sql` to create the schema.
-   * Use `business_reports.sql` for reporting queries.
+   * Run `UMC.sql` to create schema
+   * Optionally execute `business_reports.sql` for reports
 
-3. **Launch the notebook**
+3. Launch notebook:
 
    ```bash
    jupyter notebook Notebook.ipynb
    ```
 
-   Update the connection string or load CSV data if required.
-
-4. **View results**
-
-   * Run cells in the notebook to generate the visualizations.
+4. Execute cells to visualize insights.
 
 ---
 
 ## 📊 Sample Visualization
 
-Example: **Student Enrollment Trend**
-
 ```python
 import matplotlib.pyplot as plt
+import pandas as pd
 
-months = ["Jan", "Feb", "Mar", "Apr", "May"]
-enrollments = [120, 135, 150, 160, 145]
+df = pd.DataFrame({
+    "Department": ["CS", "Math", "Physics", "Biology"],
+    "Instructors": [12, 8, 10, 6]
+})
 
-plt.bar(months, enrollments, color="skyblue")
-plt.title("Monthly Student Enrollment Trend")
-plt.xlabel("Month")
-plt.ylabel("Enrollment Count")
+plt.bar(df["Department"], df["Instructors"], color="teal")
+plt.title("Department-wise Instructor Count")
+plt.xlabel("Department")
+plt.ylabel("Number of Instructors")
 plt.show()
 ```
 
@@ -111,6 +120,8 @@ plt.show()
 
 ## 📜 License
 
-This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
+
+```
 
 ---
