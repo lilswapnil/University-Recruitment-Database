@@ -1,127 +1,157 @@
 
-# 🎓 University Recruitment Database
+# 🚀 Getting Started After Cloning
 
-<p align="center">
-  <img src="assets/diagram/diagram-1.png" alt="Entity-Relationship Diagram of University Recruitment Database" width="700">
-  <br/>
-  <em>ER diagram of the recruitment database showing core tables and relationships.</em>
-</p>
+Welcome to the **University Recruitment Database (ERP Prototype)**.  
+This guide walks you through everything you need to do after cloning the repository.
 
 ---
 
-## 📖 Overview
-The **University Recruitment Database** project provides SQL schemas, reporting queries, and Jupyter notebooks to explore and visualize insights into university recruitment and student lifecycle management.  
+## 📂 1. Clone the Repository
 
-The database supports applications, onboarding, interviews, and course assignments, while the notebook visualizes student and faculty data for analysis.
-
----
-
-## ✨ Features
-- **Entity-Relationship (ER) Diagrams** for understanding database design
-- **Student Enrollment Trends** (bar charts)
-- **Instructor Salary Distribution** (histograms)
-- **Course Enrollment Distribution**
-- **Department-wise Instructor Counts**
-- **Tuition vs. Course Units Analysis** (scatter plots)
-- SQL scripts for schema creation and reporting
-
----
-
-## 🗂️ Repository Structure
-```
-
-University-Recruitment-Database/
-│── Notebook.ipynb              # Jupyter notebook for data visualization
-│── UMC.sql                     # SQL schema for University Recruitment DB
-│── business\_reports.sql        # Reporting queries for insights
-│── assets/
-│    └── diagram/
-│        ├── diagram-1.png      # ER Diagram (main view)
-│        ├── diagram-2.png      # ER Diagram (extended view)
-│── README.md                   # Project documentation
-
+```bash
+git clone https://github.com/<your-username>/University-Recruitment-Database.git
+cd University-Recruitment-Database
 ````
 
 ---
 
-## 🖼️ Database Diagrams
-### Main ER Diagram
-<p align="center">
-  <img src="assets/diagram/diagram-1.png" alt="Main ER Diagram" width="750">
-</p>
+## 🐳 2. Prerequisites
 
-### Extended ER Diagram
-<p align="center">
-  <img src="assets/diagram/diagram-2.png" alt="Extended ER Diagram" width="750">
-</p>
+* **Docker Desktop** (macOS/Windows/Linux)
+
+  * On Apple Silicon (M1/M2/M3), enable at least **6–8 GB memory** in Docker Desktop → Settings → Resources.
+* **Python 3.10+** with `pip`
+* (Optional) **Make** if you want shorter commands via a Makefile.
 
 ---
 
-## ⚙️ Prerequisites
-- **Python 3.x**
-- Jupyter Notebook
-- Required libraries:
-  ```bash
-  pip install pandas numpy matplotlib
+## 📦 3. Start the Containers
+
+From the `integrations` folder:
+
+```bash
+cd integrations
+docker compose up -d
+```
+
+👉 Services that come up:
+
+* `uni-oracle`: Oracle XE 21c (admissions system, seeded with demo data)
+* `uni-mssql`: Azure SQL Edge (SQL Server-compatible warehouse)
+* `adminer`: Adminer DB UI ([http://localhost:8080](http://localhost:8080))
+
+Check containers:
+
+```bash
+docker ps
+```
+
+---
+
+## 🗄️ 4. Initialize SQL Server Schema
+
+Run the SQL Server schema script via the `mssql-tools` image:
+
+```bash
+docker run --rm -it \
+  --add-host=host.docker.internal:host-gateway \
+  -v "$(pwd)/sqlserver/init:/scripts" \
+  mcr.microsoft.com/mssql-tools \
+  /opt/mssql-tools18/bin/sqlcmd -C -S host.docker.internal -U sa -P "SqlServerP@ssw0rd!" \
+  -i /scripts/01_create_db.sql
+```
+
+---
+
+## 📤 5. Publish Demo Data in Oracle
+
+Run the PL/SQL package to publish deltas to staging:
+
+```bash
+docker exec -it uni-oracle bash -lc \
+"sqlplus -s admissions/AdmissionsP@ssw0rd@localhost/XEPDB1 @/container-entrypoint-initdb.d/03_publish_demo.sql"
+```
+
+---
+
+## 🐍 6. Run ETL with Python
+
+Set up Python environment and install dependencies:
+
+```bash
+python -m venv venv
+source venv/bin/activate    # On macOS/Linux
+pip install -r integrations/requirements.txt
+```
+
+Run ETL:
+
+```bash
+python integrations/etl_oracle_to_sqlserver.py
+```
+
+✅ Expected output:
+
+```
+Candidate Scores:
+(2002, 'Asha', 'Patel', 95)
+(2001, 'Linh', 'Nguyen', 60)
+```
+
+---
+
+## 🌐 7. Explore with Adminer
+
+Visit [http://localhost:8080](http://localhost:8080) in your browser.
+
+* **System:** MS SQL
+  **Server:** uni-mssql
+  **User:** sa
+  **Password:** SqlServerP\@ssw0rd!
+  **Database:** university\_recruitment
+
+* **System:** Oracle
+  **Server:** uni-oracle:1521
+  **User:** admissions
+  **Password:** AdmissionsP\@ssw0rd
+  **SID/Service:** XEPDB1
+
+---
+
+## 🛠️ 8. Useful Commands
+
+Stop everything:
+
+```bash
+docker compose down
+```
+
+Restart:
+
+```bash
+docker compose up -d
+```
+
+Clean up:
+
+```bash
+docker system prune -af
+```
+
+---
+
+## 📝 Notes
+
+* Use **Azure SQL Edge** instead of `mssql/server` on Apple Silicon.
+* Oracle XE container requires enough memory (≥4 GB, ideally 6–8 GB).
+* For production-style ETL, you can extend with SQL Server Linked Server or CI/CD automation.
+
+---
+
+## 🎯 Next Steps
+
+* Extend schema with more recruitment modules
+* Add dashboards (e.g., Power BI, Streamlit, or React frontend)
+* Automate tests with GitHub Actions
+
 ````
-
----
-
-## 🚀 Getting Started
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/lilswapnil/University-Recruitment-Database.git
-   cd University-Recruitment-Database
-   ```
-
-2. Set up the database:
-
-   * Run `UMC.sql` to create schema
-   * Optionally execute `business_reports.sql` for reports
-
-3. Launch notebook:
-
-   ```bash
-   jupyter notebook Notebook.ipynb
-   ```
-
-4. Execute cells to visualize insights.
-
----
-
-## 📊 Sample Visualization
-
-```python
-import matplotlib.pyplot as plt
-import pandas as pd
-
-df = pd.DataFrame({
-    "Department": ["CS", "Math", "Physics", "Biology"],
-    "Instructors": [12, 8, 10, 6]
-})
-
-plt.bar(df["Department"], df["Instructors"], color="teal")
-plt.title("Department-wise Instructor Count")
-plt.xlabel("Department")
-plt.ylabel("Number of Instructors")
-plt.show()
-```
-
----
-
-## 👨‍💻 Contributors
-
-* **Scott B.**
-* **Shreya Bandodkar**
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
-
-```
-
----

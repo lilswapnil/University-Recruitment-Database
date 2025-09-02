@@ -1,0 +1,28 @@
+# integrations/docker-compose.yml
+services:
+  mssql:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: uni-mssql
+    environment:
+      - ACCEPT_EULA=1
+      - MSSQL_SA_PASSWORD=SqlServerP@ssw0rd!
+    ports: ["1433:1433"]
+    # Azure SQL Edge images often don't ship sqlcmd; remove healthcheck if it fails
+    volumes:
+      - ./sqlserver/init:/docker-entrypoint-initdb.d
+
+  oracle:
+    image: gvenzl/oracle-xe:21.3.0
+    container_name: uni-oracle
+    environment:
+      - ORACLE_PASSWORD=OracleP@ssw0rd
+      - APP_USER=admissions
+      - APP_USER_PASSWORD=AdmissionsP@ssw0rd
+    ports: ["1521:1521"]
+    volumes:
+      - ./oracle/init:/container-entrypoint-initdb.d
+
+  adminer:
+    image: adminer
+    restart: always
+    ports: ["8080:8080"]
