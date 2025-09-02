@@ -1,12 +1,111 @@
 
-# 🚀 Getting Started After Cloning
+# 🎓 University Recruitment Database (ERP Prototype)
 
-Welcome to the **University Recruitment Database (ERP Prototype)**.  
-This guide walks you through everything you need to do after cloning the repository.
+<p align="center">
+  <img src="assets/diagram/diagram-1.png" alt="System diagram: University Recruitment Admissions pipeline" width="600">
+  <br/>
+  <em>High-level flow of the Oracle Admissions (banner-like) → SQL Server Warehouse ETL pipeline.</em>
+</p>
+
+## 📖 Overview
+
+This project demonstrates a **University Recruitment ERP prototype** that integrates **OracleDB (PL/SQL)** admissions data with a **SQL Server (T-SQL)** data warehouse using **Dockerized containers**.
+
+It’s designed to showcase skills in:
+
+- **SQL Server**: dimensional modeling, stored procedures, triggers, candidate ranking  
+- **Oracle Database + PL/SQL**: schema design, packages, staging/publish mechanism  
+- **Docker**: reproducible multi-DB environment (SQL Server Edge for ARM, Oracle XE 21c)  
+- **Cross-DB ETL**: pulling deltas from Oracle into SQL Server for analytics  
 
 ---
 
-## 📂 1. Clone the Repository
+## ⚙️ Features
+
+- **Oracle Admissions (banner-like)**  
+  Schema + sample data + PL/SQL package to publish application deltas  
+
+- **SQL Server Data Warehouse**  
+  Dimensional model, audit triggers, ranking procedure  
+
+- **Python ETL**  
+  Loads Oracle staging deltas into SQL Server  
+
+- **Containerized Environment**  
+  Oracle XE 21c + Azure SQL Edge (ARM) + Adminer  
+
+---
+
+## 🚀 Quickstart (Makefile commands)
+
+```bash
+make up       # start containers (Oracle + SQL Server + Adminer)
+make init     # initialize SQL Server schema
+make seed     # publish Oracle demo data
+make etl      # run Python ETL (load + transform + rank)
+make rank     # query candidate rankings from SQL Server
+make down     # stop containers
+make clean    # nuke containers, images, volumes
+````
+
+✅ After `make etl`, you should see:
+
+```text
+Candidate Scores:
+(2002, 'Asha', 'Patel', 95)
+(2001, 'Linh', 'Nguyen', 60)
+```
+
+---
+
+## 📊 Example Output in SQL Server
+
+```bash
+make rank
+```
+
+Output:
+
+```text
+pidm  first_name  last_name  score
+2002  Asha        Patel      95
+2001  Linh        Nguyen     60
+```
+
+---
+
+## 🛠️ Tech Stack
+
+* **SQL Server / Azure SQL Edge**
+* **Oracle Database XE 21c**
+* **PL/SQL** (packages, procs, staging)
+* **T-SQL** (warehouse schema, ETL, triggers, ranking)
+* **Docker Compose**
+* **Python** (`pyodbc`, `oracledb`)
+
+---
+
+## 📝 Notes
+
+* Use **Azure SQL Edge** instead of `mssql/server` on Apple Silicon.
+* Oracle XE requires ≥4 GB memory (6–8 GB recommended).
+* For simplicity, ETL runs via Python. SQL Server Linked Server scripts are included as references.
+
+````
+
+---
+
+# 📝 Updated `GETTING_STARTED.md`
+
+```markdown
+# 🚀 Getting Started After Cloning
+
+Welcome to the **University Recruitment Database (ERP Prototype)**.  
+Follow these steps to bring the system up after cloning.
+
+---
+
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/<your-username>/University-Recruitment-Database.git
@@ -15,82 +114,64 @@ cd University-Recruitment-Database
 
 ---
 
-## 🐳 2. Prerequisites
+## 2. Prerequisites
 
-* **Docker Desktop** (macOS/Windows/Linux)
+* **Docker Desktop** (Mac/Windows/Linux)
 
-  * On Apple Silicon (M1/M2/M3), enable at least **6–8 GB memory** in Docker Desktop → Settings → Resources.
+  * On Apple Silicon: allocate ≥6 GB memory in Docker Desktop → Settings → Resources
 * **Python 3.10+** with `pip`
-* (Optional) **Make** if you want shorter commands via a Makefile.
+* **Make** (comes with macOS and Linux; on Windows, use WSL or Git Bash)
 
 ---
 
-## 📦 3. Start the Containers
+## 3. One-Command Workflow
 
-From the `integrations` folder:
-
-```bash
-cd integrations
-docker compose up -d
-```
-
-👉 Services that come up:
-
-* `uni-oracle`: Oracle XE 21c (admissions system, seeded with demo data)
-* `uni-mssql`: Azure SQL Edge (SQL Server-compatible warehouse)
-* `adminer`: Adminer DB UI ([http://localhost:8080](http://localhost:8080))
-
-Check containers:
+Use the provided `Makefile` to simplify everything:
 
 ```bash
-docker ps
+make up       # start containers
+make init     # create SQL Server schema
+make seed     # publish Oracle demo data
+make etl      # run Python ETL (loads into SQL Server)
+make rank     # query candidate rankings
 ```
 
 ---
 
-## 🗄️ 4. Initialize SQL Server Schema
+## 4. Explore with Adminer
 
-Run the SQL Server schema script via the `mssql-tools` image:
+Visit [http://localhost:8080](http://localhost:8080)
+
+* **SQL Server**
+
+  * System: MS SQL
+  * Server: uni-mssql
+  * User: sa
+  * Password: SqlServerP\@ssw0rd!
+  * Database: university\_recruitment
+
+* **Oracle**
+
+  * System: Oracle
+  * Server: uni-oracle:1521
+  * User: admissions
+  * Password: AdmissionsP\@ssw0rd
+  * Service: XEPDB1
+
+---
+
+## 5. Stopping & Cleanup
 
 ```bash
-docker run --rm -it \
-  --add-host=host.docker.internal:host-gateway \
-  -v "$(pwd)/sqlserver/init:/scripts" \
-  mcr.microsoft.com/mssql-tools \
-  /opt/mssql-tools18/bin/sqlcmd -C -S host.docker.internal -U sa -P "SqlServerP@ssw0rd!" \
-  -i /scripts/01_create_db.sql
+make down     # stop containers
+make clean    # remove containers, images, volumes
 ```
 
 ---
 
-## 📤 5. Publish Demo Data in Oracle
+## ✅ Expected Results
 
-Run the PL/SQL package to publish deltas to staging:
-
-```bash
-docker exec -it uni-oracle bash -lc \
-"sqlplus -s admissions/AdmissionsP@ssw0rd@localhost/XEPDB1 @/container-entrypoint-initdb.d/03_publish_demo.sql"
-```
-
----
-
-## 🐍 6. Run ETL with Python
-
-Set up Python environment and install dependencies:
-
-```bash
-python -m venv venv
-source venv/bin/activate    # On macOS/Linux
-pip install -r integrations/requirements.txt
-```
-
-Run ETL:
-
-```bash
-python integrations/etl_oracle_to_sqlserver.py
-```
-
-✅ Expected output:
+After running `make etl`, you should see:
 
 ```
 Candidate Scores:
@@ -100,58 +181,8 @@ Candidate Scores:
 
 ---
 
-## 🌐 7. Explore with Adminer
-
-Visit [http://localhost:8080](http://localhost:8080) in your browser.
-
-* **System:** MS SQL
-  **Server:** uni-mssql
-  **User:** sa
-  **Password:** SqlServerP\@ssw0rd!
-  **Database:** university\_recruitment
-
-* **System:** Oracle
-  **Server:** uni-oracle:1521
-  **User:** admissions
-  **Password:** AdmissionsP\@ssw0rd
-  **SID/Service:** XEPDB1
-
----
-
-## 🛠️ 8. Useful Commands
-
-Stop everything:
-
-```bash
-docker compose down
-```
-
-Restart:
-
-```bash
-docker compose up -d
-```
-
-Clean up:
-
-```bash
-docker system prune -af
-```
-
----
-
-## 📝 Notes
-
-* Use **Azure SQL Edge** instead of `mssql/server` on Apple Silicon.
-* Oracle XE container requires enough memory (≥4 GB, ideally 6–8 GB).
-* For production-style ETL, you can extend with SQL Server Linked Server or CI/CD automation.
-
----
-
 ## 🎯 Next Steps
 
 * Extend schema with more recruitment modules
-* Add dashboards (e.g., Power BI, Streamlit, or React frontend)
-* Automate tests with GitHub Actions
-
-````
+* Add BI dashboards (Power BI, Streamlit, etc.)
+* Automate ETL tests with GitHub Actions
